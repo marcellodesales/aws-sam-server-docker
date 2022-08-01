@@ -21,7 +21,8 @@ as simple as possible, reusing the CDK templates based on the current code. Avoi
 2. Then generate the templates from all your environments
 3. Convert the environment template to the YAML template format
 4. Start the dockerized SAM server with the YAML template
-5. Profit! Test your lambda functions without pushing to AWS Lambda!
+5. Copy our `docker-compose.yaml` to the root of your CDK project.
+6. Profit! Test your lambda functions without pushing to AWS Lambda!
 
 ## 🙌 Discover environments of your CDK project
  
@@ -153,6 +154,54 @@ cdk.out
 > * After this step, your are ready to run!
 ```console
 cp cdk.out/SupercashWebPlatformStackDev.template.json template.yaml
+```
+
+## : Copy the docker-compose.yaml to your CDK project root's dir
+
+> **NOTE**: Make sure the file is located in the root dir
+> * The version of the docker image used is latest.
+
+```yaml
+version: '3.9'
+
+# Setup a provide network for local deployments of aws services
+networks:
+  backend:
+    name: aws_backend
+    driver: bridge
+
+services:
+
+  aws-sam-api-server:
+    # Choose a release version or a SHA version, latest is tested
+    image: marcellodesales/aws-sam-server:latest
+
+    # A container will run in a dir with the same name as current dir
+    working_dir: $PWD
+
+    volumes:
+      # The volumes for the current dir is mounted
+      - $PWD:$PWD
+
+      # Needed so a docker container can be run from inside a docker container
+      - /var/run/docker.sock:/var/run/docker.sock 
+
+      # The settings to your aws if needed
+      - ~/.aws/:/root/.aws:ro
+
+    networks:
+      - "backend"
+
+    ports:
+      # SAM API server runs on port 3000
+      - "3000:3000"
+
+    environment:
+      # Just don't send telemetry data to AWS...
+      SAM_CLI_TELEMETRY: false
+
+      # The docker network created
+      DOCKER_NETWORK: aws_backend
 ```
 
 # 🏃 Run
