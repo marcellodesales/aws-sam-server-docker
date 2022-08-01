@@ -1,5 +1,11 @@
 version: '3.9'
 
+# Setup a provide network for local deployments of aws services
+networks:
+  backend:
+    name: aws_backend
+    driver: bridge
+
 services:
 
   aws-sam-api-server:
@@ -7,27 +13,29 @@ services:
     build:
       context: .
 
-    environment:
-      SAM_CLI_TELEMETRY: false
-
-    volumes:
-      - $PWD:$PWD
-      # Needed so a docker container can be run from inside a docker container
-      - /var/run/docker.sock:/var/run/docker.sock 
-      - ~/.aws/:/root/.aws:ro
-
+    # A container will run in a dir with the same name as current dir
     working_dir: $PWD
 
-    # https://github.com/aws/aws-sam-cli/issues/2436#issuecomment-1200922963
-    command: sam local start-api -p 3000 --host 0.0.0.0 --docker-network aws_backend --container-host host.docker.internal
+    volumes:
+      # The volumes for the current dir is mounted
+      - $PWD:$PWD
 
-    ports:
-      - "3000:3000"
+      # Needed so a docker container can be run from inside a docker container
+      - /var/run/docker.sock:/var/run/docker.sock 
+
+      # The settings to your aws if needed
+      - ~/.aws/:/root/.aws:ro
 
     networks:
       - "backend"
 
-networks:
-  backend:
-    name: aws_backend
-    driver: bridge
+    ports:
+      # SAM API server runs on port 3000
+      - "3000:3000"
+
+    environment:
+      # Just don't send telemetry data to AWS...
+      SAM_CLI_TELEMETRY: false
+
+      # The docker network created
+      DOCKER_NETWORK: aws_backend

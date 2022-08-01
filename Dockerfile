@@ -1,3 +1,4 @@
+# Author: Marcello.DeSales@gmail.com
 FROM ubuntu
 
 WORKDIR /app
@@ -9,7 +10,7 @@ RUN echo 'tzdata tzdata/Areas select America' | debconf-set-selections && \
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y tzdata
 
-#Install CDK and Frontend
+# Install CDK and Frontend
 RUN apt-get update && apt-get install -y \
     make \
     software-properties-common npm \
@@ -22,6 +23,8 @@ RUN apt-get install -y python${PYTHON_VERSION_SHORT} python3-pip && \
        ln -s -f /usr/bin/python${PYTHON_VERSION_SHORT} /usr/bin/python3 && \
        ln -s -f /usr/bin/python${PYTHON_VERSION_SHORT} /usr/bin/python && \
        ln -s -f /usr/bin/pip3 /usr/bin/pip
+
+# Install SAM itself
 RUN apt-get install -y python3.8-venv python3.9-venv \
     && pip install awscli aws-sam-cli==1.53.0 \
     && rm -rf /var/lib/apt/lists/*
@@ -42,11 +45,15 @@ RUN pip uninstall -y flask && \
 RUN pip install gdbgui && \
     pip install werkzeug==2.0.0
 
-# Install docker...
+# Install docker as it is required to run containers
 RUN apt-get update && \
     apt-get -qy full-upgrade && \
     apt-get install -qy curl && \
     apt-get install -qy curl && \
     curl -sSL https://get.docker.com/ | sh
 
-CMD ["sam", "--version"]
+# Just show the current version
+# Could only run SAM after setting internal container host
+# https://github.com/aws/aws-sam-cli/issues/2436#issuecomment-1200922963
+# User provide the docker network desired as env var as it is created and defined by the user
+ENTRYPOINT ["sam", "local", "start-api", "-p", "3000", "--host", "0.0.0.0", "--docker-network", "aws_backend", "--container-host", "host.docker.internal"]
