@@ -42,10 +42,12 @@ RUN pip uninstall -y flask && \
 #parkinglot-service-serverless-cdk-sam-1  |     fd = int(os.environ["WERKZEUG_SERVER_FD"])
 #parkinglot-service-serverless-cdk-sam-1  | ValueError: invalid literal for int() with base 10: 'false'
 # Fixed by https://github.com/cs01/gdbgui/issues/425#issuecomment-1144565569
+# https://github.com/cs01/gdbgui/issues/425#issuecomment-1200916195
 RUN pip install gdbgui && \
     pip install werkzeug==2.0.0
 
 # Install docker as it is required to run containers
+# https://devopscube.com/run-docker-in-docker/
 RUN apt-get update && \
     apt-get -qy full-upgrade && \
     apt-get install -qy curl && \
