@@ -1,24 +1,29 @@
-version: '3.6'
+version: '3.9'
+
 services:
-  sam:
-    image: marcellodesales/aws-sam-server
+
+  aws-sam-api-server:
+    image: marcellodesales/aws-sam-server:${VERSION:-latest}
     build:
       context: .
 
-    container_name: supercash-aws-sam
     environment:
-      - TZ=Etc/GMT
-      - SAM_CLI_TELEMETRY=false
+      SAM_CLI_TELEMETRY: false
+
     volumes:
       - $PWD:$PWD
-      - /var/run/docker.sock:/var/run/docker.sock #Needed so a docker container can be run from inside a docker container
+      # Needed so a docker container can be run from inside a docker container
+      - /var/run/docker.sock:/var/run/docker.sock 
       - ~/.aws/:/root/.aws:ro
+
     working_dir: $PWD
 
     # https://github.com/aws/aws-sam-cli/issues/2436#issuecomment-1200922963
     command: sam local start-api -p 3000 --host 0.0.0.0 --docker-network aws_backend --container-host host.docker.internal
+
     ports:
       - "3000:3000"
+
     networks:
       - "backend"
 
