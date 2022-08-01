@@ -156,7 +156,7 @@ cdk.out
 cp cdk.out/SupercashWebPlatformStackDev.template.json template.yaml
 ```
 
-## : Copy the docker-compose.yaml to your CDK project root's dir
+## ✂️ Copy the docker-compose.yaml to your CDK project root's dir
 
 > **NOTE**: Make sure the file is located in the root dir
 > * The version of the docker image used is latest.
